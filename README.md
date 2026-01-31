@@ -11,13 +11,13 @@ Automated documentation system for Claude Code projects. Drop into any project a
 **Install into your current project:**
 
 ```
-Clone https://github.com/YOUR_USERNAME/claude-docs-system into this project's .claude folder, merging the commands and creating the docs structure. Then run a full audit to populate the documentation based on my actual codebase.
+Clone https://github.com/edwinlov3tt/claude-docs-system into this project's .claude folder, merging the commands and creating the docs structure. Then run a full audit to populate the documentation based on my actual codebase.
 ```
 
 Or be more specific:
 
 ```
-1. Fetch https://github.com/YOUR_USERNAME/claude-docs-system
+1. Fetch https://github.com/edwinlov3tt/claude-docs-system
 2. Copy the contents of `commands/` into my `.claude/commands/` folder
 3. Copy the contents of `docs-templates/` into `.claude/docs/`, but don't overwrite existing files
 4. Merge the CLAUDE-TEMPLATE.md documentation protocol into my existing CLAUDE.md
@@ -106,7 +106,7 @@ Or be more specific:
 Just tell Claude Code:
 
 ```
-Install the documentation system from https://github.com/YOUR_USERNAME/claude-docs-system into this project
+Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system into this project
 ```
 
 Claude will:
@@ -123,7 +123,7 @@ Claude will:
 cd your-project
 
 # Clone into a temp directory
-git clone https://github.com/YOUR_USERNAME/claude-docs-system /tmp/claude-docs
+git clone https://github.com/edwinlov3tt/claude-docs-system /tmp/claude-docs
 
 # Copy commands
 mkdir -p .claude/commands
@@ -151,7 +151,7 @@ Then in Claude Code: `/audit`
 1. Create your project as normal
 2. Tell Claude Code:
    ```
-   Install the documentation system from https://github.com/YOUR_USERNAME/claude-docs-system and run a full audit
+   Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system and run a full audit
    ```
 3. Review generated documentation
 4. Commit the `.claude/` folder
@@ -160,7 +160,7 @@ Then in Claude Code: `/audit`
 
 1. Tell Claude Code:
    ```
-   Install the documentation system from https://github.com/YOUR_USERNAME/claude-docs-system into this project. 
+   Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system into this project. 
    Merge with any existing .claude files. Then run /audit to analyze the codebase and populate all documentation.
    ```
 2. Review and adjust generated docs
