@@ -24,6 +24,21 @@ Or be more specific:
 5. Run /audit to analyze my project and populate all documentation
 ```
 
+**Update existing installation (get latest commands):**
+
+```
+1. Fetch https://github.com/edwinlov3tt/claude-docs-system
+2. Copy all files from `commands/` into my `.claude/commands/` folder, overwriting existing files
+3. Copy any new templates from `docs-templates/` to `.claude/docs/` without overwriting existing docs
+4. Review CLAUDE-TEMPLATE.md for any new commands and add them to my CLAUDE.md if missing
+```
+
+Or quick version:
+
+```
+Update my claude-docs-system commands from https://github.com/edwinlov3tt/claude-docs-system - overwrite existing commands but preserve my docs
+```
+
 ---
 
 ## What's Included
@@ -39,6 +54,7 @@ Or be more specific:
 | `/assess` | Production readiness assessment against PRD/specs | Check how far from launch |
 | `/tasks` | View task board, dependencies, parallel opportunities | Plan what to work on |
 | `/task` | Create detailed implementation task | Break down a feature |
+| `/onboard` | Get new Claude instance up to speed | Starting new session/instance |
 | `/handoff` | Generate developer handoff doc | Before sharing project |
 
 #### Development Commands
@@ -46,6 +62,8 @@ Or be more specific:
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
 | `/localdev` | Check local dev setup, generate run instructions | Setting up or debugging local env |
+| `/secrets` | Scan for API keys/secrets before pushing | Before git push |
+| `/scan` | Find undocumented services/components | Catch up on missing docs |
 | `/task-complete` | Archive completed task, unblock dependents | When finishing a task |
 | `/log` | Quick capture from recent messages | Grab something specific fast |
 | `/doc-status` | Check documentation health | Periodic checkup |

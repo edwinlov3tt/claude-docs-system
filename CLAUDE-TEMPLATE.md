@@ -11,11 +11,13 @@ This project uses an automated documentation system. Claude auto-extracts and lo
 | Command | When to Use |
 |---------|-------------|
 | `/sync` | **End of every session** - auto-extracts everything from conversation |
+| `/onboard` | **Start of new instance** - get up to speed on project |
 | `/assess` | Check production readiness against PRD/specs |
 | `/tasks` | View task board, find parallel-safe work |
 | `/task [name]` | Create detailed implementation task |
 | `/task-complete [name]` | Archive completed task |
 | `/localdev` | Check/setup local development environment |
+| `/secrets` | Scan for API keys before git push |
 | `/handoff` | Generate handoff doc before sharing |
 
 ### Utility Commands
@@ -23,6 +25,7 @@ This project uses an automated documentation system. Claude auto-extracts and lo
 | Command | When to Use |
 |---------|-------------|
 | `/log` | Quick capture something specific mid-session |
+| `/scan` | Find undocumented services/components |
 | `/audit` | Full project analysis (first setup, periodic refresh) |
 | `/doc-status` | Check documentation health |
 
@@ -126,6 +129,21 @@ When you run `/sync`, Claude reviews the conversation and extracts:
 - After major refactors
 - Monthly refresh
 - Before onboarding someone new
+
+**`/onboard`** (new instance)
+- First thing when starting a new Claude Code session
+- When context was lost or instance is fresh
+- Gets you up to speed on project state
+
+**`/secrets`** (before push)
+- Before any git push to remote
+- After adding new integrations
+- Catches hardcoded API keys and secrets
+
+**`/scan`** (catch-up)
+- When you suspect undocumented services/components
+- After adding integrations without documenting
+- Returns selectable list to document
 
 **`/handoff`** (sharing)
 - Before giving project to another developer
