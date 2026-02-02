@@ -1,53 +1,123 @@
 ---
-description: Create detailed implementation task with steps, dependencies, and parallel execution guidance
-allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep"]
+description: Create, view, or complete implementation tasks with parallel execution guidance
+allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
 ---
 
-# Create Implementation Task
+# Task Management
 
-Generate a detailed, actionable task file for a feature or fix.
+Create detailed tasks, view the task board, or complete tasks.
 
-**Task to create:** $ARGUMENTS
+**Usage:**
+- `/task` — View task board (status, parallel groups, blockers)
+- `/task [description]` — Create a new task
+- `/task done [name]` — Complete and archive a task
 
-## Phase 1: Context Gathering
+**Argument:** $ARGUMENTS
 
-### 1.1 Understand the Requirement
-If a PRD/spec exists, read it to understand:
-- Exact requirements
-- Acceptance criteria
-- Edge cases
-- Related features
+---
 
-### 1.2 Analyze Current Codebase
+## Mode Detection
+
+**No arguments** → Show Task Board (Phase A)
+**"done [name]"** → Complete Task (Phase C)
+**Anything else** → Create Task (Phase B)
+
+---
+
+## Phase A: Task Board
+
+### Scan Tasks
 ```bash
-# Find related files
-grep -rn "[relevant keywords]" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" . 2>/dev/null | head -30
+echo "=== Task Files ==="
+ls .claude/tasks/*.md 2>/dev/null | grep -v README | grep -v _TEMPLATE
 
-# Check existing patterns
-# Look for similar implementations to follow
+echo "=== Status Counts ==="
+echo -n "Not Started: "; grep -l "Status: ⬜" .claude/tasks/*.md 2>/dev/null | wc -l
+echo -n "In Progress: "; grep -l "Status: 🔄" .claude/tasks/*.md 2>/dev/null | wc -l
+echo -n "Complete: "; grep -l "Status: ✅" .claude/tasks/*.md 2>/dev/null | wc -l
 ```
 
-### 1.3 Check Dependencies
-- What must be completed first?
-- What can be done in parallel?
-- What would this block?
+### Read Each Task
+For each task file, extract: Status, Priority, Effort, Dependencies, Files it modifies.
 
-### 1.4 Review Standards
-Check CLAUDE.md and existing code for:
-- Naming conventions
-- Code patterns used
-- File organization
-- Testing approach
+### Check Feature Backlog
+```bash
+ls .claude/features/*.md 2>/dev/null | grep -v README | grep -v _TEMPLATE | grep -v archive
+```
 
-## Phase 2: Task Breakdown
+Note features that are ready to become tasks (marked as "Ready to implement").
 
-Break into atomic sub-tasks that are:
-- **Independent** where possible
-- **Testable** individually
-- **< 2 hours** of work each
-- **Clear** about what "done" looks like
+### Build Parallel Safety Map
 
-## Phase 3: Generate Task File
+Tasks are parallel-safe if they modify different files and have no shared dependencies.
+
+### Display Board
+
+```markdown
+# Task Board
+
+## Ready to Start
+| Task | Priority | Effort | Key Files |
+|------|----------|--------|-----------|
+| [task](tasks/task.md) | P0 | M | `src/api/` |
+
+## Parallel Execution Groups
+Tasks within each group are safe for simultaneous Claude instances.
+
+### Group A (no conflicts)
+- `task-1` → modifies `src/components/`
+- `task-2` → modifies `src/api/`
+
+### Group B (no conflicts)
+- `task-3` → modifies `workers/`
+
+### ⚠️ Sequential Only
+- `task-4` and `task-5` both modify `src/lib/db.ts`
+
+## In Progress
+| Task | Progress |
+|------|----------|
+| [task] | Step 3/7 |
+
+## Blocked
+| Task | Waiting On |
+|------|------------|
+| [task] | [blocking-task] |
+
+## Feature Backlog (ready to task out)
+| Feature | Phase | Complexity |
+|---------|-------|------------|
+| [feature] | MVP | M |
+
+Run `/task [name]` to create a task
+Run `/task done [name]` to complete a task
+Run `/feature` to view full backlog
+```
+
+---
+
+## Phase B: Create Task
+
+### Gather Context
+
+1. **Check if a matching feature exists** in `.claude/features/`:
+   ```bash
+   ls .claude/features/*$ARGUMENTS*.md 2>/dev/null
+   ```
+   If found, use its assessment (phase, complexity, dependencies) as the starting point.
+
+2. **Check for PRD/specs** that define requirements for this feature.
+
+3. **Analyze codebase** for related files, existing patterns, conventions:
+   ```bash
+   grep -rn "[relevant keywords]" --include="*.ts" --include="*.tsx" --include="*.js" --include="*.py" . 2>/dev/null | grep -v node_modules | head -30
+   ```
+
+4. **Read CLAUDE.md** for conventions and code standards.
+
+5. **Check existing tasks** for dependencies and conflicts.
+
+### Create Task File
 
 Create `.claude/tasks/[task-name].md`:
 
@@ -57,16 +127,16 @@ Create `.claude/tasks/[task-name].md`:
 ## Status: ⬜ Not Started
 
 ## Meta
-- **Priority**: P0/P1/P2
+- **Priority**: P0 / P1 / P2
 - **Effort**: S (< 1 day) / M (1-3 days) / L (3+ days)
 - **Created**: [DATE]
+- **Source**: [Feature backlog / conversation / ad-hoc]
 - **Branch**: `feature/[task-name]`
 
 ## Goal
-[2-3 sentences describing what this task accomplishes and why it matters]
+[2-3 sentences: what this accomplishes and why it matters]
 
 ## Requirements
-[Extracted from PRD/spec if available]
 - [ ] Requirement 1
 - [ ] Requirement 2
 - [ ] Requirement 3
@@ -76,230 +146,230 @@ Create `.claude/tasks/[task-name].md`:
 ## Dependencies
 
 ### Blocked By (must complete first)
-| Task | Status | Why Blocking |
-|------|--------|--------------|
-| [task-name] | ⬜/🔄/✅ | [reason] |
+| Task | Status | Why |
+|------|--------|-----|
+| _None_ | - | - |
 
-### Blocks (waiting on this)
+### Blocks (other tasks waiting on this)
 | Task | Impact |
 |------|--------|
-| [task-name] | [what can't proceed] |
+| _None_ | - |
 
-### Can Run In Parallel
-These tasks have no dependencies with this one - safe for concurrent Claude instances:
-- [ ] [task-name] - [brief description]
-- [ ] [task-name] - [brief description]
+### Parallel Safety
+These tasks can run simultaneously (different files, no shared state):
+- [list of compatible tasks]
+
+⚠️ **Cannot parallelize with**: [tasks that touch same files]
 
 ---
 
 ## Pre-Implementation Checklist
 
-Before starting, verify:
+Before writing any code:
 
-- [ ] Dependencies above are ✅ completed
+- [ ] Read these files for context:
+  1. `[file-path]` — [what to understand]
+  2. `[file-path]` — [what to understand]
+- [ ] Dependencies above are ✅ complete
 - [ ] Branch created: `git checkout -b feature/[task-name]`
-- [ ] Understand the acceptance criteria
-- [ ] Reviewed similar existing implementations
-- [ ] Know which files will be modified
+- [ ] Understand the acceptance criteria below
 
-### Context to Review
-Read these files/sections first:
-1. `[file-path]` - [what to understand from it]
-2. `[file-path]` - [what to understand from it]
-3. `.claude/docs/[relevant-doc].md` - [context]
-
-### Existing Patterns to Follow
+### Patterns to Follow
 ```typescript
-// Example of the pattern to use (from existing code)
-[code example showing the convention to follow]
+// From existing codebase — follow this convention:
+[code example from actual project]
 ```
 
 ---
 
 ## Implementation Steps
 
-### Step 1: [Step Name]
-**Estimated**: 30 min
+### Step 1: [Name]
+**Time**: ~30 min
 
-**Goal**: [What this step accomplishes]
+**Files**:
+- `path/to/file.ts` — [what changes]
 
-**Files to modify**:
-- `path/to/file.ts` - [what changes]
-
-**Implementation**:
-```typescript
-// Specific code or pseudocode
-```
+**Do**:
+[Specific implementation details, code guidance, or pseudocode]
 
 **Verify**:
-- [ ] [How to verify this step is complete]
+- [ ] [How to confirm this step works]
 
 ---
 
-### Step 2: [Step Name]
-**Estimated**: 45 min
+### Step 2: [Name]
+**Time**: ~45 min
 
-**Goal**: [What this step accomplishes]
+**Files**:
+- `path/to/file.ts` — [what changes]
 
-**Files to modify**:
-- `path/to/file.ts` - [what changes]
-- `path/to/another.ts` - [what changes]
-
-**Implementation**:
-[Detailed instructions]
+**Do**:
+[Implementation details]
 
 **Verify**:
-- [ ] [Verification step]
+- [ ] [Verification]
 
 ---
 
-### Step 3: [Step Name]
-[Continue pattern...]
+[Continue for each step...]
 
 ---
 
 ## Code Standards
 
-### Variables & Naming
-Follow existing project conventions:
-```typescript
-// Use these patterns:
-const [example from codebase]
+Keep consistent across Claude instances:
 
-// NOT these:
-const [anti-pattern to avoid]
+### Naming
+```typescript
+// Use this pattern:
+[example from project]
 ```
 
 ### Error Handling
 ```typescript
-// Standard error handling pattern for this project:
-[example from codebase]
+// Standard pattern:
+[example from project]
 ```
 
 ### Types
 ```typescript
-// Type definitions should follow:
-[example from codebase]
+// Type conventions:
+[example from project]
 ```
 
 ---
 
 ## Files to Modify
 
-| File | Action | Description |
-|------|--------|-------------|
-| `src/path/file.ts` | Modify | [what changes] |
-| `src/path/new-file.ts` | Create | [purpose] |
+| File | Action | What Changes |
+|------|--------|--------------|
+| `src/file.ts` | Modify | [description] |
+| `src/new.ts` | Create | [purpose] |
 | `tests/file.test.ts` | Create | [test coverage] |
 
 ---
 
-## Testing
-
-### Unit Tests
-```typescript
-// Tests to write:
-describe('[Feature]', () => {
-  it('should [expected behavior]', () => {
-    // test implementation
-  });
-});
-```
-
-### Manual Testing
-1. [ ] [Manual test step 1]
-2. [ ] [Manual test step 2]
-3. [ ] [Manual test step 3]
-
-### Edge Cases to Test
-- [ ] [Edge case 1]
-- [ ] [Edge case 2]
-
----
-
-## Verification Checklist
+## Verification
 
 Before marking complete:
-
 - [ ] All implementation steps done
-- [ ] Code follows project patterns (see Code Standards above)
-- [ ] No TypeScript errors: `pnpm typecheck`
-- [ ] Build succeeds: `pnpm build`
-- [ ] Tests pass: `pnpm test`
-- [ ] Manual testing completed
-- [ ] No console.logs or debug code left
-- [ ] Edge cases handled
+- [ ] `pnpm typecheck` passes (or equivalent)
+- [ ] `pnpm build` passes
+- [ ] Manual testing: [specific things to test]
+- [ ] Edge cases: [specific scenarios]
+- [ ] No debug code or console.logs left
+- [ ] Code follows project conventions
 
 ---
 
 ## Completion
 
-When done:
-1. Update status in this file: `## Status: ✅ Complete`
-2. Run `/task-complete [task-name]` to archive
-3. Update `.claude/tasks/README.md` status table
-4. Commit: `git commit -m "feat: [task description]"`
-
----
-
-## References
-
-- PRD/Spec: `[path or link]`
-- Related tasks: `[task-names]`
-- Design doc: `[path or link]`
-- External docs: `[urls]`
-
----
-
-## Notes
-
-[Any additional context, gotchas, or decisions made during implementation]
+When done: `/task done [task-name]`
 ```
 
-## Phase 4: Update Task README
+### Update Task Board
+Add the new task to `.claude/tasks/README.md`.
 
-Update `.claude/tasks/README.md` to include this task in the appropriate table.
-
-## Phase 5: Check Parallel Safety
-
-### Identify Parallel-Safe Tasks
-Tasks are parallel-safe if they:
-- Modify different files
-- Don't depend on each other's output
-- Don't modify shared state
-
-### Flag Conflicts
-Tasks that CANNOT run in parallel:
-- Same file modifications
-- Database schema changes
-- Shared configuration changes
-- Sequential dependencies
-
-Add warnings to task file if conflicts exist.
-
-## Output
-
+### Output
 ```markdown
 # Task Created
 
 **File**: `.claude/tasks/[task-name].md`
-**Priority**: [P0/P1/P2]
-**Effort**: [S/M/L]
-**Steps**: [X] implementation steps
-
-## Summary
-[Brief description]
-
-## Dependencies
-- Blocked by: [X tasks]
-- Can parallel with: [X tasks]
+**Priority**: P0 | **Effort**: M | **Steps**: 5
 
 ## Quick Start
 ```bash
 git checkout -b feature/[task-name]
-# Read pre-implementation checklist first
-# Then follow implementation steps
+# Review pre-implementation checklist first
 ```
 
-Run `/tasks` to see full task board
+## Can Parallel With
+- [compatible tasks]
+
+## Blocked By
+- [dependencies, if any]
+```
+
+---
+
+## Phase C: Complete Task
+
+### Find Task
+```bash
+ls .claude/tasks/*[argument]*.md 2>/dev/null | grep -v README | grep -v archive
+```
+
+### Run Verification
+```bash
+# Build check
+pnpm build 2>&1 || npm run build 2>&1 || echo "No build script"
+
+# Type check
+pnpm typecheck 2>&1 || npm run typecheck 2>&1 || echo "No typecheck"
+
+# Test check
+pnpm test 2>&1 || npm run test 2>&1 || echo "No test script"
+```
+
+### If Verification Passes
+
+1. Update task status:
+   ```markdown
+   ## Status: ✅ Complete
+   ## Completed: [DATE]
+   ```
+
+2. Move to archive:
+   ```bash
+   mkdir -p .claude/tasks/archive
+   mv .claude/tasks/[task-name].md .claude/tasks/archive/
+   ```
+
+3. Update `.claude/tasks/README.md` — remove from active, add to completed.
+
+4. Add to `.claude/docs/CHANGELOG.md`:
+   ```markdown
+   ## [DATE]
+   ### Completed
+   - [task name]: [brief description]
+   ```
+
+5. Check for unblocked tasks:
+   ```bash
+   grep -l "[task-name]" .claude/tasks/*.md 2>/dev/null
+   ```
+   Update any tasks that were blocked by this one.
+
+6. If a matching feature exists in `.claude/features/`, move it to archive too.
+
+### Output
+```markdown
+# Task Complete ✅
+
+**Task**: [task-name]
+**Archived**: `.claude/tasks/archive/[task-name].md`
+
+## Verification
+| Check | Result |
+|-------|--------|
+| Build | ✅ |
+| Types | ✅ |
+| Tests | ✅ |
+
+## Unblocked
+- [tasks now ready to start]
+
+**Next recommended**: [highest priority unblocked task]
+```
+
+### If Verification Fails
+```markdown
+# Task Completion Blocked ❌
+
+## Failures
+- Build: [error]
+- Tests: [X failures]
+
+Fix the issues, then run `/task done [name]` again.
 ```

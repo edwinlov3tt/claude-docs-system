@@ -1,167 +1,158 @@
 ---
-description: Auto-extract and log all issues, decisions, services, and components from this conversation
+description: Auto-extract issues, decisions, services, and changes from conversation into documentation
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Grep"]
 ---
 
-# Sync Documentation from Conversation
+# Sync Documentation
 
-Review the entire conversation context and automatically extract and log:
-- Issues discovered or discussed
-- Technical decisions made
-- Services integrated or modified
-- Components created or changed
+Review the conversation and auto-extract everything worth documenting.
 
-This is the "I don't want to think about docs" command - just run it and everything gets logged.
+This is the primary documentation command. Run it at the end of every coding session.
 
-## Phase 1: Context Analysis
+## What to Extract
 
-Review the full conversation and identify:
+Review the entire conversation history and look for:
 
-### 1.1 Issues & Bugs
-Look for:
-- Bugs discovered during development
-- Edge cases that weren't handled
-- Error messages or failures encountered
-- TODOs mentioned but not resolved
-- Performance problems noticed
-- Workarounds implemented (indicates underlying issue)
-- "We should fix this later" type comments
-- Things that "don't work yet" or are "broken"
+### 1. Issues & Bugs → `.claude/docs/KNOWN_ISSUES.md`
 
-### 1.2 Technical Decisions
-Look for:
-- "Let's use X instead of Y"
-- "I chose X because..."
-- Framework/library selections
-- Architecture patterns chosen
-- Database schema decisions
-- API design choices
-- Deployment strategy decisions
-- Tradeoffs discussed and resolved
-- "The reason we're doing it this way..."
+**Signals**: "doesn't work", "broke", "error", "bug", "failing", "workaround", TODO mentioned, edge case discovered, "hack", "temporary fix"
 
-### 1.3 Service Integrations
-Look for:
-- New external APIs integrated
-- SDK installations (npm install, pip install)
-- Environment variables added for services
-- API keys or credentials discussed
-- Webhooks configured
-- Third-party services connected (Stripe, Supabase, OpenAI, Cloudflare, etc.)
-
-### 1.4 Component Changes
-Look for:
-- New files or modules created
-- Significant refactors
-- New API routes added
-- New React components or pages
-- Database schema changes
-- New utilities or helpers
-
-## Phase 2: Auto-Logging
-
-For each item identified:
-
-### Log Issues → KNOWN_ISSUES.md
+For each issue found:
 ```markdown
-### [SEVERITY] [Title extracted from context]
-- **Location**: `[file if mentioned]`
-- **Symptom**: [What was described as broken/wrong]
-- **Root Cause**: [If discussed, otherwise "Investigation needed"]
-- **Workaround**: [If one was used, otherwise "None"]
-- **Proper Fix**: [If discussed, otherwise "TBD"]
-- **Added**: [today's date]
-- **Context**: Discovered during [brief description of what we were working on]
+### [SEVERITY] Brief description
+- **Location**: `file:line` or area of code
+- **Symptom**: What goes wrong
+- **Workaround**: If one exists
+- **Proper Fix**: What should be done
+- **Added**: [DATE]
 ```
 
-### Log Decisions → DECISIONS.md
+**Severity inference:**
+- Blocking / security / data loss → CRITICAL
+- Major feature broken → HIGH
+- Workaround exists → MEDIUM
+- Minor / cosmetic → LOW
+
+### 2. Decisions → `.claude/docs/DECISIONS.md`
+
+**Signals**: "let's use X", "chose Y because", "going with", "switched from", "decided to", tradeoff discussions, framework/library selections
+
+For each decision:
 ```markdown
-## [Decision Title]
-- **Date**: [today]
-- **Status**: Accepted
-
-### Context
-[What problem we were solving when this came up]
-
-### Decision
-[What was chosen based on conversation]
-
-### Alternatives Considered
-[If discussed in conversation, otherwise note "Alternatives not explicitly discussed"]
-
-### Consequences
-[Based on what was discussed]
+### [DATE] Decision title
+- **Choice**: What was decided
+- **Alternatives**: What else was considered
+- **Rationale**: Why this choice
+- **Impact**: What it affects
 ```
 
-### Log Services → services/[name].md
-Create or update service doc with:
-- What service was integrated
-- What it's being used for
-- Any env vars mentioned
-- Files where it's used
-- Any issues or gotchas discovered
+**Record if**: Framework choice, data model design, infrastructure decision, non-obvious tradeoff
+**Skip if**: Obvious pattern, temporary hack, personal preference
 
-### Log Components → components/[name].md
-Create or update component doc with:
-- What was built/changed
-- Purpose
-- Key files involved
-- Dependencies added
+### 3. Service Integrations → `.claude/docs/services/[name].md`
 
-## Phase 3: Update Changelog
+**Signals**: `npm install`, `pip install`, API key setup, SDK imports, new environment variables, "integrated with", "connected to"
 
-Add entry to CHANGELOG.md summarizing what was accomplished in this session.
+For each new service, create or update the service doc:
+```markdown
+# [Service Name]
 
-## Phase 4: Summary Report
+## Purpose
+Why this service is used in the project
+
+## Setup
+- Package: `package-name`
+- Env vars: `SERVICE_API_KEY`
+
+## Usage
+Where and how it's used in the codebase
+
+## Key Files
+- `src/lib/service.ts` - Client setup
+- `src/api/webhook.ts` - Webhook handler
+```
+
+### 4. Component Changes → `.claude/docs/components/[name].md`
+
+**Signals**: New files created, major refactors, new API routes, schema changes, new React components, new utilities
+
+For significant components, create or update:
+```markdown
+# [Component Name]
+
+## Purpose
+What this component does
+
+## Key Files
+- `path/to/file.ts` - Description
+
+## Exports
+- `functionName()` - What it does
+
+## Dependencies
+- Internal: [other components]
+- External: [packages]
+```
+
+### 5. Changelog → `.claude/docs/CHANGELOG.md`
+
+Add a session summary entry:
+```markdown
+## [DATE]
+
+### Added
+- [New features or capabilities]
+
+### Changed
+- [Modifications to existing behavior]
+
+### Fixed
+- [Bug fixes]
+
+### Decisions
+- [Key decisions made this session]
+```
+
+## Deduplication Rules
+
+Before adding any entry:
+1. Check if a similar issue/decision already exists
+2. If so, UPDATE it rather than creating a duplicate
+3. For issues: update status, add new information
+4. For decisions: only add if the decision changed or was revisited
+
+## Output
+
+After extracting, report:
 
 ```markdown
-# Documentation Synced
+# Sync Complete
 
-**Session**: [Brief description of what this conversation was about]
-**Date**: [today]
+## Extracted from this session:
 
-## Auto-Extracted & Logged
+### Issues (X new, Y updated)
+- [SEVERITY] Issue description → KNOWN_ISSUES.md
 
-### Issues (X found)
-| Severity | Title | Location |
-|----------|-------|----------|
-| [SEV] | [Title] | `[file]` |
+### Decisions (X logged)
+- Decision description → DECISIONS.md
 
-### Decisions (X found)
-| Decision | Summary |
-|----------|---------|
-| [Title] | [One-liner] |
+### Services (X documented)
+- Service name → services/service.md
 
-### Services (X found)
-| Service | Action |
-|---------|--------|
-| [Name] | [Created/Updated] |
-
-### Components (X found)
-| Component | Action |
-|-----------|--------|
-| [Name] | [Created/Updated] |
+### Components (X updated)
+- Component name → components/component.md
 
 ### Changelog
-- Added entry for [date] summarizing session work
-
-## Files Modified
-- `.claude/docs/KNOWN_ISSUES.md` - [X issues added]
-- `.claude/docs/DECISIONS.md` - [X decisions added]
-- `.claude/docs/CHANGELOG.md` - [session entry added]
-- `.claude/docs/services/[x].md` - [created/updated]
-- `.claude/docs/components/[x].md` - [created/updated]
+- Session summary → CHANGELOG.md
 
 ---
 
-*Run `/doc-status` to verify documentation health*
+Nothing to extract? That's fine too. Not every session produces documentation.
 ```
 
-## Execution Notes
+## Edge Cases
 
-- Be thorough - review the ENTIRE conversation, not just recent messages
-- Don't duplicate: check existing docs before adding
-- If something was already logged, skip it
-- Infer severity for issues based on context (blocking = HIGH, workaround exists = MEDIUM, minor = LOW)
-- When uncertain about details, note "Details unclear from conversation" rather than guessing
-- Group related items (e.g., multiple issues in the same component)
+- If `.claude/docs/` doesn't exist, create the structure first
+- If a doc file doesn't exist, create it from the template
+- If conversation was just Q&A with no code changes, say so — don't force documentation
+- Short conversations may have nothing to extract — that's normal

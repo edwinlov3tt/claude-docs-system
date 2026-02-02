@@ -1,160 +1,221 @@
 # Claude Docs System
 
-Automated documentation system for Claude Code projects. Drop into any project and let Claude Code maintain your docs automatically.
+Automated documentation and project management for Claude Code projects. 8 commands. Drop into any project.
 
-**Philosophy**: You code, Claude documents. No manual logging - just run `/sync` and Claude extracts issues, decisions, services, and changes from your conversation automatically.
+**Philosophy**: You code, Claude documents. Run `/sync` at the end of sessions. That's it.
+
+---
 
 ## Quick Start
 
-### For Claude Code Users
-
-**Install into your current project:**
+**Install into a new project:**
 
 ```
-Clone https://github.com/edwinlov3tt/claude-docs-system into this project's .claude folder, merging the commands and creating the docs structure. Then run a full audit to populate the documentation based on my actual codebase.
+Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system — copy commands to .claude/commands/, copy templates to .claude/docs/ and .claude/features/ and .claude/tasks/ (don't overwrite existing files), merge CLAUDE-TEMPLATE.md into my CLAUDE.md, then run /audit to populate documentation from my codebase.
 ```
 
-Or be more specific:
+**Update an existing installation:**
 
 ```
-1. Fetch https://github.com/edwinlov3tt/claude-docs-system
-2. Copy the contents of `commands/` into my `.claude/commands/` folder
-3. Copy the contents of `docs-templates/` into `.claude/docs/`, but don't overwrite existing files
-4. Merge the CLAUDE-TEMPLATE.md documentation protocol into my existing CLAUDE.md
-5. Run /audit to analyze my project and populate all documentation
-```
-
-**Update existing installation (get latest commands):**
-
-```
-1. Fetch https://github.com/edwinlov3tt/claude-docs-system
-2. Copy all files from `commands/` into my `.claude/commands/` folder, overwriting existing files
-3. Copy any new templates from `docs-templates/` to `.claude/docs/` without overwriting existing docs
-4. Review CLAUDE-TEMPLATE.md for any new commands and add them to my CLAUDE.md if missing
-```
-
-Or quick version:
-
-```
-Update my claude-docs-system commands from https://github.com/edwinlov3tt/claude-docs-system - overwrite existing commands but preserve my docs
+Update my claude-docs-system from https://github.com/edwinlov3tt/claude-docs-system — overwrite all files in .claude/commands/ with the latest, copy any new templates without overwriting existing docs, and check CLAUDE-TEMPLATE.md for any new sections to add to CLAUDE.md.
 ```
 
 ---
 
-## What's Included
+## Commands
 
-### Slash Commands
+8 commands. That's all you need.
 
-#### Primary Commands (use these)
+| Command | When | What It Does |
+|---------|------|-------------|
+| `/onboard` | New Claude instance | Read all docs, generate project briefing |
+| `/dev` | Ready to code | Check environment, install deps, start servers |
+| `/sync` | End of session | Auto-extract issues, decisions, services from conversation |
+| `/push` | Ready to ship | Scan for secrets → review changes → commit → push |
+| `/feature` | Have an idea | Log it with phase/complexity/value assessment |
+| `/task` | Ready to build | Create, view, or complete implementation tasks |
+| `/audit` | Need status check | Deep code scan, production readiness, find undocumented items |
+| `/handoff` | Sharing project | Generate comprehensive developer handoff doc |
 
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `/audit` | Full project analysis + doc generation | First time setup, periodic refresh |
-| `/sync` | Auto-extract issues/decisions/services from conversation | End of coding sessions |
-| `/assess` | Production readiness assessment against PRD/specs | Check how far from launch |
-| `/tasks` | View task board, dependencies, parallel opportunities | Plan what to work on |
-| `/task` | Create detailed implementation task | Break down a feature |
-| `/onboard` | Get new Claude instance up to speed | Starting new session/instance |
-| `/handoff` | Generate developer handoff doc | Before sharing project |
+---
 
-#### Development Commands
+## Workflows
 
-| Command | Purpose | When to Use |
-|---------|---------|-------------|
-| `/localdev` | Check local dev setup, generate run instructions | Setting up or debugging local env |
-| `/secrets` | Scan for API keys/secrets before pushing | Before git push |
-| `/scan` | Find undocumented services/components | Catch up on missing docs |
-| `/task-complete` | Archive completed task, unblock dependents | When finishing a task |
-| `/log` | Quick capture from recent messages | Grab something specific fast |
-| `/doc-status` | Check documentation health | Periodic checkup |
+### Starting a New Session
 
-#### Utility Commands (manual alternatives)
+```bash
+/onboard                  # Get briefed on project state
+/dev                      # Start the servers
+```
 
-| Command | Purpose | Usage |
-|---------|---------|-------|
-| `/doc` | Manual changelog update | When /sync is overkill |
-| `/doc-init` | Create docs folder structure | Manual setup only |
-| `/issue` | Log a specific bug | `/issue API timeout` |
-| `/decision` | Record a specific decision | `/decision Using X over Y` |
-| `/service` | Document a specific service | `/service Stripe` |
+### Daily Development
 
-### Documentation Structure
+```bash
+# Code normally with Claude...
+# Discuss bugs, make decisions, integrate services...
+# At the end:
+/sync                     # Claude extracts everything into docs
+```
+
+### Logging Ideas
+
+```bash
+/feature add OAuth login with Google    # Logs idea + assessment
+/feature                                # View backlog by phase
+/feature mvp                            # View only MVP features
+```
+
+### Building Features
+
+```bash
+/task                           # View task board + parallel groups
+/task add-oauth-login           # Create detailed implementation task
+# ... implement following the steps ...
+/task done add-oauth-login      # Verify + archive when complete
+```
+
+### Multi-Instance Development
+
+```bash
+/task                     # Check "Parallel Execution Groups"
+# Instance A: picks task from Group A (modifies src/components/)
+# Instance B: picks task from Group B (modifies src/api/)
+# ❌ Never run tasks that modify the same files
+```
+
+### Shipping
+
+```bash
+/push                     # Scans secrets → shows changes → commits → pushes
+                          # Blocks if secrets found, logs to KNOWN_ISSUES.md
+```
+
+### Weekly Checkup
+
+```bash
+/audit                    # Full scan: readiness, undocumented items, issues
+```
+
+### Before Handoff
+
+```bash
+/audit                    # Ensure docs are current
+/handoff                  # Generate HANDOFF.md
+```
+
+---
+
+## What `/sync` Extracts
+
+| If you discussed... | It goes to... |
+|---------------------|---------------|
+| Bugs, errors, "this doesn't work" | `KNOWN_ISSUES.md` |
+| "Let's use X because Y" | `DECISIONS.md` |
+| `npm install stripe`, API keys | `services/stripe.md` |
+| New routes, components, modules | `components/*.md` |
+| What was built/fixed this session | `CHANGELOG.md` |
+
+---
+
+## The Feature → Task Pipeline
+
+```
+/feature "add export to CSV"
+    ↓
+Assessed: Phase v1.0 | Complexity S | Value Medium
+Saved to .claude/features/add-export-csv.md
+    ↓
+When ready to build:
+    ↓
+/task add-export-csv
+    ↓
+Creates detailed task with steps, deps, parallel safety
+Saved to .claude/tasks/add-export-csv.md
+    ↓
+Implement following the steps...
+    ↓
+/task done add-export-csv
+    ↓
+Verified, archived, dependent tasks unblocked
+```
+
+---
+
+## File Structure
 
 ```
 .claude/
-├── commands/           # Slash commands
-│   ├── audit.md        # Full project audit
+├── commands/           # 8 slash commands
+│   ├── onboard.md      # Get new instance up to speed
+│   ├── dev.md          # Check env + start servers
 │   ├── sync.md         # Auto-extract from conversation
-│   ├── assess.md       # Production readiness check
-│   ├── tasks.md        # View task board
-│   ├── task.md         # Create implementation task
-│   ├── task-complete.md# Archive completed task
-│   ├── localdev.md     # Local dev readiness
-│   ├── log.md          # Quick capture
-│   ├── handoff.md      # Generate handoff doc
-│   ├── doc.md          # Manual updates
-│   ├── doc-init.md     # Initialize structure
-│   ├── doc-status.md   # Check doc health
-│   ├── decision.md     # Manual decision logging
-│   ├── issue.md        # Manual issue logging
-│   └── service.md      # Manual service docs
+│   ├── push.md         # Scan secrets + commit + push
+│   ├── feature.md      # Log ideas with assessment
+│   ├── task.md         # Create/view/complete tasks
+│   ├── audit.md        # Deep project analysis
+│   └── handoff.md      # Generate handoff doc
 │
-├── docs/               # Documentation
-│   ├── ARCHITECTURE.md # System overview
-│   ├── CHANGELOG.md    # What changed when
-│   ├── DECISIONS.md    # Why things were built this way
-│   ├── KNOWN_ISSUES.md # Bugs, edge cases, tech debt
-│   ├── ASSESSMENT.md   # Production readiness (generated)
-│   ├── LOCAL_DEV.md    # Local dev setup guide (generated)
-│   ├── components/     # Internal component docs
-│   └── services/       # External service docs
+├── docs/               # Documentation (auto-maintained)
+│   ├── ARCHITECTURE.md
+│   ├── CHANGELOG.md
+│   ├── DECISIONS.md
+│   ├── KNOWN_ISSUES.md
+│   ├── ASSESSMENT.md   # Generated by /audit
+│   ├── LOCAL_DEV.md    # Generated by /dev
+│   ├── services/       # External service docs
+│   └── components/     # Internal component docs
 │
-└── tasks/              # Implementation tasks
-    ├── README.md       # Task board overview
-    ├── [task-name].md  # Individual task files
+├── features/           # Feature backlog (from /feature)
+│   ├── README.md       # Backlog by phase
+│   ├── [feature].md    # Individual ideas
+│   └── archive/        # Shipped features
+│
+└── tasks/              # Implementation tasks (from /task)
+    ├── README.md       # Task board
+    ├── [task].md       # Active tasks
     └── archive/        # Completed tasks
 ```
 
 ---
 
-## Installation Methods
+## Installation
 
 ### Method 1: Claude Code (Recommended)
 
-Just tell Claude Code:
+Tell Claude Code:
 
 ```
 Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system into this project
 ```
 
-Claude will:
-1. Clone or fetch the repo
-2. Copy commands to `.claude/commands/`
-3. Create `.claude/docs/` structure
-4. Merge documentation protocol into your `CLAUDE.md`
-5. Run initial audit
+Claude will clone, copy commands and templates, merge CLAUDE.md, and run initial audit.
 
-### Method 2: Manual Installation
+### Method 2: Manual
 
 ```bash
-# Navigate to your project
 cd your-project
 
-# Clone into a temp directory
 git clone https://github.com/edwinlov3tt/claude-docs-system /tmp/claude-docs
 
-# Copy commands
+# Commands
 mkdir -p .claude/commands
 cp /tmp/claude-docs/commands/*.md .claude/commands/
 
-# Copy doc templates
+# Doc templates
 mkdir -p .claude/docs/services .claude/docs/components
 cp /tmp/claude-docs/docs-templates/*.md .claude/docs/
 
-# Append to CLAUDE.md (or create it)
+# Task templates
+mkdir -p .claude/tasks/archive
+cp /tmp/claude-docs/docs-templates/tasks/*.md .claude/tasks/
+
+# Feature templates
+mkdir -p .claude/features/archive
+cp /tmp/claude-docs/docs-templates/features/*.md .claude/features/
+
+# CLAUDE.md protocol
 cat /tmp/claude-docs/CLAUDE-TEMPLATE.md >> CLAUDE.md
 
-# Cleanup
 rm -rf /tmp/claude-docs
 ```
 
@@ -162,295 +223,16 @@ Then in Claude Code: `/audit`
 
 ---
 
-## Workflows
-
-### New Project Setup
-
-1. Create your project as normal
-2. Tell Claude Code:
-   ```
-   Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system and run a full audit
-   ```
-3. Review generated documentation
-4. Commit the `.claude/` folder
-
-### Existing Project Setup
-
-1. Tell Claude Code:
-   ```
-   Install the documentation system from https://github.com/edwinlov3tt/claude-docs-system into this project. 
-   Merge with any existing .claude files. Then run /audit to analyze the codebase and populate all documentation.
-   ```
-2. Review and adjust generated docs
-3. Commit changes
-
-### Daily Development Workflow
-
-**The simple version:**
-```
-# Code normally with Claude
-# ...
-# When done, just run:
-/sync
-```
-
-That's it. Claude reviews your conversation and auto-logs:
-- Any bugs or issues you discussed
-- Technical decisions you made
-- Services you integrated
-- Components you created/modified
-- Changelog entries
-
-**If you want to capture something specific quickly:**
-```
-/log
-```
-
-### Production Planning Workflow
-
-```
-# Check how far from production
-/assess
-
-# This analyzes against your PRD/specs and generates:
-# - Gap analysis (what's done vs what's needed)
-# - Prioritized task list
-# - Blocking issues
-# - Estimated time to production
-```
-
-### Task-Based Development Workflow
-
-For larger features, use the task system:
-
-```
-# View current task board
-/tasks
-
-# Create a detailed task for a feature
-/task implement user authentication
-
-# Work on the task following its steps...
-
-# When complete, archive it
-/task-complete user-auth
-```
-
-**Multi-instance development:**
-- Check `/tasks` for "Parallel Execution Groups"
-- Multiple Claude instances can work on tasks in different groups simultaneously
-- Never parallelize tasks that modify the same files
-
-### Local Development Setup
-
-```
-# Check if local dev environment is ready
-/localdev
-
-# This generates:
-# - Setup instructions in .claude/docs/LOCAL_DEV.md
-# - Updates CLAUDE.md with dev server commands
-# - Lists any blocking issues (missing env vars, services not running)
-```
-
-### Before Handoff
-
-```
-/doc-status    # Check documentation health
-/assess        # Check production readiness
-/handoff       # Generate comprehensive handoff document
-```
-
----
-
-## Command Details
-
-### /sync - Auto-Extract Everything (PRIMARY COMMAND)
-
-This is the main command. Run it at the end of a coding session and Claude will:
-
-1. **Review the entire conversation**
-2. **Auto-detect and extract:**
-   - Bugs discovered → KNOWN_ISSUES.md
-   - Decisions made → DECISIONS.md
-   - Services integrated → services/*.md
-   - Components changed → components/*.md
-3. **Update CHANGELOG.md** with session summary
-4. **Report what was logged**
-
-**What it looks for:**
-- "This is broken" / "doesn't work" → Issue
-- "Let's use X instead of Y" → Decision
-- `npm install @stripe/stripe-js` → Service integration
-- "Created new API route for..." → Component
-
-### /assess - Production Readiness
-
-Analyzes your project against PRD/specs and generates:
-- **Gap analysis**: What's complete vs what's missing
-- **Prioritized task list**: P0 (blocking), P1, P2
-- **Blocking issues**: What must be fixed before launch
-- **Time estimate**: Rough estimate to production
-
-Creates `.claude/docs/ASSESSMENT.md` and task stubs for P0 items.
-
-### /tasks - Task Board
-
-View all tasks, their status, dependencies, and parallel execution opportunities:
-- **Ready tasks**: No blockers, can start now
-- **Parallel groups**: Tasks safe to run in multiple Claude instances
-- **Blocked tasks**: What's waiting on what
-- **Dependency tree**: Visual task relationships
-
-### /task - Create Implementation Task
-
-Creates a detailed task file with:
-- Pre-implementation checklist (what to review first)
-- Step-by-step implementation guide
-- Code standards to follow (for consistency across Claude instances)
-- Files to modify
-- Verification checklist
-- Dependency mapping
-
-```
-/task implement user authentication
-```
-
-### /task-complete - Archive Completed Task
-
-When you finish a task:
-- Runs verification (build, typecheck, tests)
-- Archives task to `.claude/tasks/archive/`
-- Unblocks dependent tasks
-- Updates changelog
-
-```
-/task-complete user-auth
-```
-
-### /localdev - Local Dev Readiness
-
-Checks your local development environment:
-- Runtime versions (Node, Python, etc.)
-- Dependencies installed
-- Environment variables
-- Database/services running
-- CORS configuration
-- Port availability
-
-Generates `.claude/docs/LOCAL_DEV.md` with setup instructions.
-
-### /log - Quick Capture
-
-Lighter version of /sync. Reviews just recent messages and grabs anything notable.
-
-```
-/log                    # Auto-detect from recent context
-/log the auth bug       # Focus on something specific
-```
-
-### /audit - Full Project Audit
-
-Comprehensive analysis for first-time setup or periodic refresh. Scans actual code, git history, and populates all documentation.
-
-### /handoff - Developer Handoff
-
-Generates comprehensive `HANDOFF.md` with everything a new developer needs.
-
----
-
-## Customization
-
-### Adding Project-Specific Commands
-
-Create new `.md` files in `.claude/commands/`:
-
-```markdown
----
-description: Your command description
-allowed-tools: ["Read", "Write", "Edit", "Bash"]
----
-
-# Command Name
-
-Instructions for Claude Code to follow...
-```
-
-### Modifying Templates
-
-Edit files in `.claude/docs/` to match your project's needs.
-
----
-
 ## Best Practices
 
-1. **Run `/sync` at the end of sessions** - Let Claude do the documentation work
-2. **Run `/assess` when planning** - Know where you stand before diving in
-3. **Use `/task` for complex features** - Break down work into parallel-safe chunks
-4. **Check `/tasks` before starting** - See what's ready and what can run in parallel
-5. **Run `/audit` periodically** - Monthly or after major changes
-6. **Run `/localdev` when onboarding** - Ensure smooth local setup
-7. **Run `/handoff` before sharing** - Generates everything a new dev needs
-
-### Multi-Instance Development
-
-When running multiple Claude Code instances:
-
-```
-/tasks  # Check parallel execution groups first
-```
-
-- ✅ Tasks in different parallel groups are safe
-- ✅ Tasks modifying different directories are safe
-- ❌ Never parallelize tasks modifying same files
-- ❌ Never parallelize database migrations
-- ❌ Never parallelize package.json changes
-
----
-
-## File Structure Reference
-
-After installation:
-
-```
-your-project/
-├── .claude/
-│   ├── commands/
-│   │   ├── audit.md           # Full project analysis
-│   │   ├── sync.md            # Auto-extract (primary)
-│   │   ├── assess.md          # Production readiness
-│   │   ├── tasks.md           # Task board view
-│   │   ├── task.md            # Create task
-│   │   ├── task-complete.md   # Archive task
-│   │   ├── localdev.md        # Local dev check
-│   │   ├── log.md             # Quick capture
-│   │   ├── handoff.md         # Generate handoff
-│   │   ├── doc.md             # Manual updates
-│   │   ├── doc-init.md        # Initialize structure
-│   │   ├── doc-status.md      # Check health
-│   │   ├── decision.md        # Manual decision
-│   │   ├── issue.md           # Manual issue
-│   │   └── service.md         # Manual service doc
-│   ├── docs/
-│   │   ├── ARCHITECTURE.md
-│   │   ├── CHANGELOG.md
-│   │   ├── DECISIONS.md
-│   │   ├── KNOWN_ISSUES.md
-│   │   ├── ASSESSMENT.md      # Generated by /assess
-│   │   ├── LOCAL_DEV.md       # Generated by /localdev
-│   │   ├── components/
-│   │   └── services/
-│   └── tasks/
-│       ├── README.md          # Task board
-│       ├── [task-name].md     # Active tasks
-│       └── archive/           # Completed tasks
-├── CLAUDE.md (with documentation protocol)
-├── HANDOFF.md (generated by /handoff)
-└── [your project files]
-```
+1. **`/sync` at the end of every session** — This is the main habit
+2. **`/feature` when you have ideas** — Capture them before you forget
+3. **`/task` before building** — Break work into parallel-safe chunks
+4. **`/push` instead of raw git** — Never accidentally push secrets
+5. **`/audit` periodically** — Weekly or after major changes
 
 ---
 
 ## License
 
-MIT - Use freely in your projects.
+MIT — Use freely in your projects.

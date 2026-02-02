@@ -1,284 +1,119 @@
 ---
-description: Onboard a new Claude instance - quickly get up to speed on the project
-allowed-tools: ["Read", "Write", "Bash", "Grep"]
+description: Get a new Claude instance up to speed on the project by reading all documentation
+allowed-tools: ["Read", "Bash", "Grep"]
 ---
 
-# Onboard New Claude Instance
+# Onboard — Get Up to Speed
 
-Get a new Claude Code instance fully up to speed on this project as quickly as possible. This command reads all documentation and provides a comprehensive briefing.
+Read all project documentation and generate a comprehensive briefing. This is for NEW Claude instances that need context fast.
 
-## Phase 1: Project Discovery
+This command reads docs — it does NOT scan code deeply. Use `/audit` for deep code analysis once you have context.
 
-### 1.1 Find Core Documentation
-Read in order of priority:
+## Phase 1: Read Core Documentation
+
+Read these in order. Skip any that don't exist.
+
+### Priority 1 — Must Read
+1. `CLAUDE.md` — Project-specific instructions, conventions, rules
+2. `README.md` — Project overview, purpose, quick start
+3. `PRD.md` / `SPEC.md` / `REQUIREMENTS.md` — Product requirements (check root and docs/)
+4. `.claude/docs/ARCHITECTURE.md` — Tech stack, structure, deployment
+
+### Priority 2 — Context
+5. `.claude/docs/KNOWN_ISSUES.md` — Current bugs and blockers
+6. `.claude/docs/DECISIONS.md` — Why things were built this way
+7. `.claude/docs/ASSESSMENT.md` — Production readiness (if exists)
+8. `.claude/docs/LOCAL_DEV.md` — How to run locally (if exists)
+
+### Priority 3 — Current Work
+9. `.claude/tasks/README.md` — Task board, what's in progress
+10. `.claude/features/README.md` — Feature backlog by phase (if exists)
+11. `.claude/docs/CHANGELOG.md` — Recent changes (last 10 entries)
+
+### Priority 4 — Reference (scan titles, read if relevant)
+12. `.claude/docs/services/*.md` — External integrations
+13. `.claude/docs/components/*.md` — Internal component docs
+
+## Phase 2: Quick Project Scan
+
+Lightweight context gathering (NOT a full audit):
 
 ```bash
-# List available documentation
-echo "=== Available Documentation ==="
-ls -la CLAUDE.md README.md PRD*.md SPEC*.md 2>/dev/null
-ls -la .claude/docs/*.md 2>/dev/null
-ls -la docs/*.md 2>/dev/null
-```
+# Project type and structure
+ls -la package.json pyproject.toml Cargo.toml wrangler.toml 2>/dev/null
 
-### 1.2 Read Essential Files
+# High-level directory structure
+find . -type d -maxdepth 2 | grep -v node_modules | grep -v .git | grep -v __pycache__ | grep -v .next | sort
 
-**Priority 1 - Must Read:**
-1. `CLAUDE.md` - Project-specific instructions and context
-2. `README.md` - Project overview
-3. `.claude/docs/ARCHITECTURE.md` - Technical architecture
-4. `PRD.md` or similar - Product requirements (if exists)
-
-**Priority 2 - Should Read:**
-5. `.claude/docs/KNOWN_ISSUES.md` - Current bugs and blockers
-6. `.claude/docs/DECISIONS.md` - Why things were built this way
-7. `.claude/docs/ASSESSMENT.md` - Production readiness (if exists)
-8. `.claude/docs/LOCAL_DEV.md` - How to run locally (if exists)
-
-**Priority 3 - Reference:**
-9. `.claude/tasks/README.md` - Current task board
-10. `.claude/docs/CHANGELOG.md` - Recent changes
-11. `.claude/docs/services/*.md` - External integrations
-12. `.claude/docs/components/*.md` - Internal components
-
-## Phase 2: Codebase Overview
-
-### 2.1 Project Structure
-```bash
-# Get high-level structure
-find . -type d -maxdepth 2 | grep -v node_modules | grep -v .git | grep -v __pycache__ | sort
-
-# Key config files
-ls -la package.json pyproject.toml Cargo.toml wrangler.toml vercel.json tsconfig.json 2>/dev/null
-```
-
-### 2.2 Tech Stack Summary
-```bash
-# Package.json dependencies
-cat package.json 2>/dev/null | grep -A50 '"dependencies"' | head -30
-
-# Python requirements
-cat requirements.txt pyproject.toml 2>/dev/null | head -30
-```
-
-### 2.3 Entry Points
-```bash
-# Find main entry files
-ls -la src/index.* src/main.* src/app.* app/page.* pages/index.* main.* index.* 2>/dev/null
-```
-
-## Phase 3: Current State Assessment
-
-### 3.1 Recent Activity
-```bash
-# Recent commits
+# Recent git activity
 git log --oneline -10 2>/dev/null
-
-# Current branch
 git branch --show-current 2>/dev/null
-
-# Uncommitted changes
 git status --short 2>/dev/null
 ```
 
-### 3.2 Task Status
-Read `.claude/tasks/README.md` for:
-- Tasks in progress
-- Blocked tasks
-- Ready to start tasks
+## Phase 3: Generate Briefing
 
-### 3.3 Known Issues
-Read `.claude/docs/KNOWN_ISSUES.md` for:
-- CRITICAL issues (blocking)
-- HIGH issues (important)
-- Active bugs being worked on
-
-## Phase 4: Generate Briefing
-
-Create a comprehensive briefing for the new Claude instance:
+Present the briefing directly in chat:
 
 ```markdown
 # Project Briefing
 
-**Generated**: [DATE]
-**For**: New Claude Code Instance
+## Overview
+**Project**: [name]
+**Purpose**: [1-2 sentences]
+**Type**: [Web app / API / CLI / etc.]
+**Stage**: [Early dev / Feature complete / Production / etc.]
 
----
-
-## 🎯 Project Overview
-
-**Name**: [from package.json or README]
-**Purpose**: [1-2 sentence description from README/PRD]
-**Type**: [Web app / API / CLI / Extension / etc.]
-
----
-
-## 🛠 Tech Stack
-
+## Tech Stack
 | Layer | Technology |
 |-------|------------|
 | Frontend | [X] |
 | Backend | [X] |
 | Database | [X] |
 | Hosting | [X] |
-| Key Libraries | [X, Y, Z] |
 
----
-
-## 📁 Project Structure
-
-```
-[Key directories and their purposes]
-```
-
----
-
-## 🚦 Current Status
-
-### Development Phase
-[Where we are: Early development / Feature complete / Production ready / etc.]
-
-### Recent Work
-[Summary of last 5-10 commits]
+## Current State
 
 ### Active Tasks
 | Task | Status | Priority |
 |------|--------|----------|
-| [task] | 🔄 In Progress | P0 |
-| [task] | ⬜ Ready | P1 |
+| [task] | 🔄 | P0 |
 
-### Blocked By
-[Any blocking issues or dependencies]
+### Blocking Issues
+- [CRITICAL/HIGH issues from KNOWN_ISSUES.md]
 
----
+### Recent Changes
+- [Last 3-5 meaningful commits or changelog entries]
 
-## ⚠️ Critical Information
+## Key Decisions
+[2-3 most important architectural decisions that affect current work]
 
-### Known Issues (Priority)
-1. **[CRITICAL]** [Issue] - [brief description]
-2. **[HIGH]** [Issue] - [brief description]
+## Gotchas
+[Things to watch out for — from KNOWN_ISSUES and DECISIONS]
 
-### Key Decisions
-[Important architectural decisions that affect current work]
-
-### Gotchas & Warnings
-[Things to watch out for, common mistakes]
-
----
-
-## 🔧 Development Setup
-
-### Quick Start
-```bash
-[Commands to get running locally]
-```
-
-### Environment Variables
-[Required env vars - see .env.example]
-
-### Running Tests
-```bash
-[Test command]
-```
+## Feature Backlog
+| Feature | Phase | Complexity |
+|---------|-------|------------|
+| [feature] | MVP | M |
+[Top 5 features if backlog exists]
 
 ---
 
-## 📋 Conventions & Standards
+## Ready to Help With
 
-### Code Style
-[Key patterns to follow from CLAUDE.md]
-
-### File Organization
-[Where to put new files]
-
-### Naming Conventions
-[Variable, function, file naming patterns]
-
----
-
-## 🎯 Immediate Focus Areas
-
-Based on current state, prioritize:
-
-1. **[Highest priority item]**
-   - Why: [reason]
-   - Files: [relevant files]
-
-2. **[Second priority]**
-   - Why: [reason]
-   - Files: [relevant files]
-
-3. **[Third priority]**
-   - Why: [reason]
-   - Files: [relevant files]
-
----
-
-## 📚 Key Documentation
-
-| Document | Purpose | Read When |
-|----------|---------|-----------|
-| `CLAUDE.md` | Project rules | Always |
-| `.claude/docs/ARCHITECTURE.md` | System design | Understanding structure |
-| `.claude/docs/KNOWN_ISSUES.md` | Current bugs | Before fixing bugs |
-| `.claude/docs/DECISIONS.md` | Past decisions | Before making changes |
-| `.claude/tasks/README.md` | Task board | Planning work |
-
----
-
-## 🔗 Quick Commands
-
-| Command | Purpose |
-|---------|---------|
-| `/tasks` | View task board |
-| `/assess` | Check production readiness |
-| `/sync` | Log work at end of session |
-| `/secrets` | Check for exposed secrets |
-
----
-
-## ❓ If You Need More Context
-
-- **Architecture questions**: Read `.claude/docs/ARCHITECTURE.md`
-- **Why was X built this way**: Read `.claude/docs/DECISIONS.md`
-- **What's broken**: Read `.claude/docs/KNOWN_ISSUES.md`
-- **Service integrations**: Read `.claude/docs/services/[service].md`
-- **Production status**: Run `/assess`
-
----
-
-*This briefing was auto-generated. For the most current information, check the source documentation.*
-```
-
-## Phase 5: Output Briefing
-
-Present the briefing directly in the conversation so the new Claude instance has immediate context.
-
-After presenting:
-
-```markdown
----
-
-## ✅ Onboarding Complete
-
-I've reviewed:
-- [X] CLAUDE.md
-- [X] README.md  
-- [X] Architecture documentation
-- [X] Known issues
-- [X] Current tasks
-- [X] Recent git history
-
-### Ready to Help With
-
-Based on current project state, I can:
-1. [Most relevant task or area]
-2. [Second most relevant]
-3. [Third most relevant]
-
-### Questions I'd Suggest Clarifying
-[Any ambiguities or missing context that would help]
-
----
+Based on current project state:
+1. [Most relevant priority]
+2. [Second priority]
+3. [Third priority]
 
 What would you like to work on?
 ```
+
+## Rules
+
+- Present the briefing IN CHAT so it's immediately useful
+- Be concise — this is a briefing, not a novel
+- Focus on what matters NOW: active tasks, blocking issues, recent decisions
+- If documentation is sparse, say what's missing and suggest running `/audit`
+- Do NOT audit code or scan for undocumented items — that's `/audit`'s job
+- Do NOT start servers or check environment — that's `/dev`'s job
