@@ -17,7 +17,7 @@ Install the documentation system from https://github.com/edwinlov3tt/claude-docs
 **Update an existing installation:**
 
 ```
-Update my claude-docs-system from https://github.com/edwinlov3tt/claude-docs-system — overwrite all files in .claude/commands/ with the latest, copy any new templates without overwriting existing docs, and check CLAUDE-TEMPLATE.md for any new sections to add to CLAUDE.md.
+Update my claude-docs-system from https://github.com/edwinlov3tt/claude-docs-system — overwrite all files in .claude/commands/ with the latest, remove old commands from this system (decision.md, doc-init.md, doc-status.md, doc.md, issue.md, service.md), copy any new templates without overwriting existing docs, and check CLAUDE-TEMPLATE.md for any new sections to add to CLAUDE.md.
 ```
 
 ---
